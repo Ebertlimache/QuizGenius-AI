@@ -35,7 +35,7 @@ const navigation = [
   { name: "Subir Material", href: "/dashboard/upload", icon: Upload },
   { name: "Flashcards", href: "/dashboard/flashcards", icon: BookOpen },
   { name: "Cuestionarios", href: "/dashboard/quizzes", icon: FileQuestion },
-  { name: "Progreso", href: "/dashboard/progress", icon: BarChart3 },
+  { name: "Progreso", href: "/dashboard/progreso-estudiantes", icon: BarChart3 },
   { name: "Configuración", href: "/dashboard/settings", icon: Settings },
 ]
 

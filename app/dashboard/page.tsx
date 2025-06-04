@@ -3,84 +3,85 @@
 import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 import PrivateRoute from '@/components/PrivateRoute';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookOpen, FileText, Brain, BarChart } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useAuth();
 
+  const dashboardItems = [
+    {
+      id: 1,
+      title: "Subir Material",
+      description: "Sube tus materiales de estudio para generar contenido de aprendizaje",
+      icon: FileText,
+      href: "/dashboard/upload",
+      color: "text-blue-600",
+      bgColor: "bg-blue-100"
+    },
+    {
+      id: 2,
+      title: "Flashcards",
+      description: "Practica con tarjetas de memoria para mejorar tu retención",
+      icon: Brain,
+      href: "/dashboard/flashcards",
+      color: "text-purple-600",
+      bgColor: "bg-purple-100"
+    },
+    {
+      id: 3,
+      title: "Cuestionarios",
+      description: "Pon a prueba tus conocimientos con cuestionarios interactivos",
+      icon: BookOpen,
+      href: "/dashboard/quizzes",
+      color: "text-green-600",
+      bgColor: "bg-green-100"
+    },
+    {
+      id: 4,
+      title: "Progreso",
+      description: "Visualiza tu progreso y obtén recomendaciones personalizadas",
+      icon: BarChart,
+      href: "/dashboard/progreso-estudiantes",
+      color: "text-orange-600",
+      bgColor: "bg-orange-100"
+    }
+  ];
+
   return (
     <PrivateRoute>
       <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex">
-                <div className="flex-shrink-0 flex items-center">
-                  <span className="text-2xl font-bold text-indigo-600">QuizGenius AI</span>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                {user?.role === 'admin' && (
-                  <Link
-                    href="/admin"
-                    className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                  >
-                    Panel Admin
-                  </Link>
-                )}
-                <span className="text-gray-700">Hola, {user?.name}</span>
-                <Link
-                  href="/settings"
-                  className="px-3 py-2 rounded-md text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                >
-                  Configuración
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
+        
 
         <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <div className="px-4 py-6 sm:px-0">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <Link
-                href="/upload"
-                className="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-lg font-medium text-gray-900">Subir Material</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Sube tus materiales de estudio para generar contenido de aprendizaje
-                </p>
-              </Link>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+                <p className="text-gray-500">Bienvenido a tu centro de aprendizaje personalizado.</p>
+              </div>
+            </div>
 
-              <Link
-                href="/flashcards"
-                className="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-lg font-medium text-gray-900">Flashcards</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Practica con tarjetas de memoria para mejorar tu retención
-                </p>
-              </Link>
-
-              <Link
-                href="/quiz"
-                className="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-lg font-medium text-gray-900">Cuestionarios</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Pon a prueba tus conocimientos con cuestionarios interactivos
-                </p>
-              </Link>
-
-              <Link
-                href="/progress"
-                className="block p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="text-lg font-medium text-gray-900">Progreso</h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  Visualiza tu progreso y obtén recomendaciones personalizadas
-                </p>
-              </Link>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {dashboardItems.map((item) => (
+                <Card key={item.id} className="flex flex-col">
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div className={`rounded-full ${item.bgColor} p-2`}>
+                        <item.icon className={`h-4 w-4 ${item.color}`} />
+                      </div>
+                    </div>
+                    <CardTitle className="mt-2">{item.title}</CardTitle>
+                    <CardDescription>{item.description}</CardDescription>
+                  </CardHeader>
+                  <CardFooter>
+                    <Button className="w-full" asChild>
+                      <Link href={item.href}>Acceder</Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
             </div>
           </div>
         </main>
