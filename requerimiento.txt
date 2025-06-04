@@ -1,0 +1,94 @@
+
+🧠 ESPECIFICACIÓN COMPLETA DEL PROTOTIPO - QuizGenius AI
+
+✅ 1. SISTEMA DE AUTENTICACIÓN CON ROLES (100% EN FRONTEND)
+
+🔐 Login y Registro funcional:
+- Registro guarda usuario en localStorage con campos: name, email, password, role: "estudiante".
+- Login verifica contra datos guardados en localStorage.
+- Usuario activo se guarda como "sessionUser".
+
+👥 Usuarios predefinidos:
+- Si no existen, al iniciar la app agregar automáticamente:
+  - Admin:
+    email: admin@admin.com
+    password: admin
+    role: admin
+  - Docente:
+    email: docente@docente.com
+    password: docente
+    role: docente
+
+🚪 Cerrar sesión:
+- Botón que borra "sessionUser" y redirige a /login.
+
+🔐 Protección de rutas:
+- Middleware o componente `PrivateRoute`.
+- Redirige a /login si no hay sesión.
+
+🎭 Gestión de roles:
+- Mostrar menú y vistas según el rol del usuario activo.
+  - Estudiante: /dashboard, /upload, /quiz, /flashcards, /progress, /settings
+  - Docente: lo anterior + acceso a edición de preguntas y progreso de estudiantes
+  - Admin: acceso exclusivo a /admin (gestión de usuarios)
+
+✅ 2. MÓDULOS FUNCIONALES (CON DATOS SIMULADOS)
+
+📂 /upload
+- Subida de archivo con <input type="file" />.
+- Simular procesamiento (setTimeout).
+- Mostrar conceptos clave y preguntas generadas (datos mockeados).
+
+🧠 /quiz
+- Mostrar preguntas de opción múltiple desde JSON simulado.
+- Feedback inmediato.
+- Mostrar resultado final y guardar en localStorage.
+
+🃏 /flashcards
+- Tarjetas de repaso con pregunta/respuesta.
+- Botones: “Lo sabía” y “Repasar”.
+- Guardar estadísticas en localStorage.
+
+📊 /progress
+- Gráficos con datos simulados.
+- Mostrar porcentaje de aciertos, temas por reforzar, etc.
+- Usar chart.js o recharts.
+
+⚙️ /settings
+- Ver nombre, email.
+- Permitir editar nombre/contraseña.
+- Toggle modo claro/oscuro.
+- Botón de cerrar sesión.
+
+🛠 /admin (solo rol admin)
+- Tabla con todos los usuarios.
+- Cambiar rol (solo visual).
+- Eliminar usuarios (excepto admin y docente).
+
+✅ 3. ASPECTOS TÉCNICOS
+
+🧱 Estructura:
+- Usar React Context o `useAuth()` para estado global del usuario.
+- Modularizar lógica:
+  - `authService.js` → login, register, logout
+  - `PrivateRoute.jsx` → proteger rutas
+  - `useAuth.js` → acceso rápido al usuario y helpers
+  - `data/quizzes.json`, `data/flashcards.json` → mock data
+
+🎨 Diseño visual:
+- Tailwind CSS
+- Sidebar con íconos (lucide-react)
+- Animaciones con framer-motion (opcional)
+- Responsive
+
+📦 Persistencia:
+- Todo debe funcionar solo con `localStorage`, sin backend.
+
+✅ 4. DETALLES OPCIONALES (si hay tiempo)
+
+- Exportar resultados a PDF con `jspdf`.
+- Agregar simulación de IA para generar preguntas (con texto fijo).
+- Mensajes de alerta (ej. Toast cuando se guarda algo).
+- Pagina 404 si ruta no existe.
+
+📌 ESTE TEXTO PUEDE USARSE COMO GUÍA MAESTRA PARA PEDIR AYUDA EN CURSOR O CONTINUAR DESARROLLO
