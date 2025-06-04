@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, ArrowRight, RotateCcw, Brain } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTheme } from "next-themes"
 
 type User = {
   email: string;
@@ -50,6 +51,7 @@ export default function FlashcardPage({ params }: { params: { id: string } }) {
   const [reviewCards, setReviewCards] = useState<Set<number>>(new Set())
   const [completed, setCompleted] = useState(false)
   const router = useRouter()
+  const { theme } = useTheme()
   
   const card = flashcardSet.cards[currentCard]
   const progress = ((currentCard + 1) / flashcardSet.cards.length) * 100
@@ -94,7 +96,7 @@ export default function FlashcardPage({ params }: { params: { id: string } }) {
     const knownPercentage = Math.round((knownCount / totalCards) * 100)
     
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
+      <div className={theme === 'dark' ? 'min-h-screen bg-gray-900 flex flex-col' : 'min-h-screen bg-gray-50 flex flex-col'}>
         <div className="flex-1 max-w-2xl mx-auto w-full space-y-6 p-6">
           <div className="text-center">
             <div className="flex justify-center mb-4">
@@ -170,7 +172,7 @@ export default function FlashcardPage({ params }: { params: { id: string } }) {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className={theme === 'dark' ? 'min-h-screen bg-gray-900 flex flex-col' : 'min-h-screen bg-gray-50 flex flex-col'}>
       <div className="flex-1 max-w-2xl mx-auto w-full space-y-6 p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -190,7 +192,7 @@ export default function FlashcardPage({ params }: { params: { id: string } }) {
         <Card
           className={`relative h-64 cursor-pointer transition-all duration-500 transform hover:shadow-lg ${
             flipped ? "rotate-y-180" : ""
-          }`}
+          } ${theme === 'dark' ? 'bg-black text-white' : 'bg-white text-black'}`}
           onClick={handleFlip}
         >
           <div className={`absolute inset-0 p-6 flex items-center justify-center text-center ${
@@ -198,7 +200,7 @@ export default function FlashcardPage({ params }: { params: { id: string } }) {
           }`}>
             <p className="text-xl font-medium">{card.front}</p>
           </div>
-          <div className={`absolute inset-0 p-6 flex items-center justify-center text-center bg-gray-50 ${
+          <div className={`absolute inset-0 p-6 flex items-center justify-center text-center ${
             flipped ? "" : "hidden"
           }`}>
             <p className="text-xl">{card.back}</p>

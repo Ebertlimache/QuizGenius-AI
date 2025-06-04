@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { BookOpen, FileQuestion, CheckCircle2, Brain, ArrowRight } from "lucide-react"
+import { useTheme } from "next-themes"
 
 // Datos simulados
 const extractedConcepts = [
@@ -84,6 +85,7 @@ export default function PreviewPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const contentType = searchParams.get("type") || "quiz"
+  const { theme } = useTheme()
 
   const handleCreateQuiz = () => {
     router.push("/dashboard/quizzes/new")
@@ -191,7 +193,13 @@ export default function PreviewPage() {
                   <div
                     key={optionIndex}
                     className={`flex items-center gap-3 rounded-lg border p-3 ${
-                      question.correctAnswer === optionIndex ? "border-green-200 bg-green-50" : "border-gray-200"
+                      question.correctAnswer === optionIndex
+                        ? theme === 'dark'
+                          ? 'border-green-700 bg-green-700 text-white'
+                          : 'border-green-200 bg-green-50 text-green-900'
+                        : theme === 'dark'
+                          ? 'border-gray-700 bg-gray-900 text-gray-100'
+                          : 'border-gray-200'
                     }`}
                   >
                     {question.correctAnswer === optionIndex ? (
@@ -204,8 +212,8 @@ export default function PreviewPage() {
                     <span className="text-sm">{option}</span>
                   </div>
                 ))}
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-blue-800">
+                <div className={theme === 'dark' ? 'mt-3 p-3 bg-blue-900 rounded-lg' : 'mt-3 p-3 bg-blue-50 rounded-lg'}>
+                  <p className={theme === 'dark' ? 'text-sm text-blue-200' : 'text-sm text-blue-800'}>
                     <strong>Explicación:</strong> {question.explanation}
                   </p>
                 </div>
