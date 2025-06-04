@@ -1,0 +1,67 @@
+@keyframes voice-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+@keyframes voice-recording-pulse {
+  0%, 100% {
+    background-color: rgb(239, 68, 68);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  50% {
+    background-color: rgb(220, 38, 38);
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.3);
+  }
+}
+@keyframes voice-speaking-pulse {
+  0%, 100% {
+    background-color: rgb(34, 197, 94);
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  50% {
+    background-color: rgb(22, 163, 74);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.3);
+  }
+}
+.voice-recording {
+  animation: voice-recording-pulse 1.5s infinite;
+}
+.voice-speaking {
+  animation: voice-speaking-pulse 1.5s infinite;
+}
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+.animate-in {
+  animation-duration: 0.3s;
+  animation-fill-mode: both;
+}
+.slide-in-from-bottom-2 {
+  animation-name: slide-in-from-bottom;
+}
+@media (max-width: 640px) {
+  .voiceflow-widget {
+    width: calc(100vw - 2rem);
+    height: calc(100vh - 8rem);
+    bottom: 1rem;
+    left: 1rem;
+    right: 1rem;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .voiceflow-widget {
+    border-color: rgb(55, 65, 81);
+  }
+} 
