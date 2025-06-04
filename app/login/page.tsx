@@ -100,11 +100,7 @@ export default function LoginPage() {
               Regístrate aquí
             </Link>
           </div>
-          <div className="text-sm text-center text-gray-500">
-            <Link href="/forgot-password" className="text-indigo-600 hover:text-indigo-500 font-medium">
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
+
         </CardFooter>
       </Card>
     </div>
