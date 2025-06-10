@@ -6,69 +6,54 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Brain, BookOpen, Calculator, Globe, Microscope, History, Code, Music } from "lucide-react";
+import { Brain, Plus } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
-const topics = [
+const initialTopics = [
   {
     id: 'matematicas',
     name: 'Matemáticas',
     description: 'Álgebra, cálculo, geometría y más',
-    icon: Calculator,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100'
   },
   {
     id: 'ciencias',
     name: 'Ciencias',
     description: 'Física, química, biología',
-    icon: Microscope,
-    color: 'text-green-600',
-    bgColor: 'bg-green-100'
   },
   {
     id: 'historia',
     name: 'Historia',
     description: 'Historia mundial y local',
-    icon: History,
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-100'
   },
   {
     id: 'literatura',
     name: 'Literatura',
     description: 'Análisis literario y escritura',
-    icon: BookOpen,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100'
   },
   {
     id: 'programacion',
     name: 'Programación',
     description: 'Desarrollo web y software',
-    icon: Code,
-    color: 'text-indigo-600',
-    bgColor: 'bg-indigo-100'
   },
   {
     id: 'idiomas',
     name: 'Idiomas',
     description: 'Inglés, español y más',
-    icon: Globe,
-    color: 'text-red-600',
-    bgColor: 'bg-red-100'
   },
   {
     id: 'musica',
     name: 'Música',
     description: 'Teoría musical y práctica',
-    icon: Music,
-    color: 'text-pink-600',
-    bgColor: 'bg-pink-100'
   }
 ];
 
 export default function ChooseTopicsPage() {
+  const [topics, setTopics] = useState(initialTopics);
   const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
+  const [newTopicName, setNewTopicName] = useState('');
+  const [newTopicDescription, setNewTopicDescription] = useState('');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
   const handleTopicToggle = (topicId: string) => {
@@ -79,6 +64,20 @@ export default function ChooseTopicsPage() {
         return [...prev, topicId];
       }
     });
+  };
+
+  const handleAddTopic = () => {
+    if (newTopicName.trim() && newTopicDescription.trim()) {
+      const newTopic = {
+        id: newTopicName.toLowerCase().replace(/\s+/g, '-'),
+        name: newTopicName,
+        description: newTopicDescription,
+      };
+      setTopics([...topics, newTopic]);
+      setNewTopicName('');
+      setNewTopicDescription('');
+      setIsDialogOpen(false);
+    }
   };
 
   const handleContinue = () => {
@@ -114,9 +113,6 @@ export default function ChooseTopicsPage() {
               >
                 <CardHeader className="p-4">
                   <div className="flex items-center justify-between">
-                    <div className={`rounded-full ${topic.bgColor} p-1.5`}>
-                      <topic.icon className={`h-4 w-4 ${topic.color}`} />
-                    </div>
                     <Checkbox
                       id={topic.id}
                       checked={selectedTopics.includes(topic.id)}
@@ -129,6 +125,45 @@ export default function ChooseTopicsPage() {
                 </CardHeader>
               </Card>
             ))}
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-lg cursor-pointer">
+                  <CardHeader className="p-4 flex items-center justify-center h-full">
+                    <div className="flex flex-col items-center gap-2">
+                      <Plus className="h-6 w-6 text-gray-400" />
+                      <span className="text-sm text-gray-500">Agregar tema</span>
+                    </div>
+                  </CardHeader>
+                </Card>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Agregar nuevo tema</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Nombre del tema</Label>
+                    <Input
+                      id="name"
+                      value={newTopicName}
+                      onChange={(e) => setNewTopicName(e.target.value)}
+                      placeholder="Ingresa el nombre del tema"
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="description">Descripción</Label>
+                    <Input
+                      id="description"
+                      value={newTopicDescription}
+                      onChange={(e) => setNewTopicDescription(e.target.value)}
+                      placeholder="Ingresa una descripción"
+                    />
+                  </div>
+                  <Button onClick={handleAddTopic}>Agregar tema</Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </div>

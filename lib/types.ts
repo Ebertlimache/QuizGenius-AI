@@ -1,11 +1,36 @@
 export interface User {
+  id: number;
+  email: string;
+  progress: {
+    quizzes: {
+      quizId: string;
+      score: number;
+      completedAt: string;
+    }[];
+    flashcards: {
+      setId: string;
+      knownCards: number;
+      totalCards: number;
+      lastStudied: string;
+    }[];
+    uploadedMaterials: {
+      id: string;
+      title: string;
+      uploadedAt: string;
+      status: 'pending' | 'approved' | 'rejected';
+      feedback?: string;
+    }[];
+  };
+}
+
+export interface UserOld {
   id: string;
   name: string;
   email: string;
   password: string;
   role: 'admin' | 'docente' | 'estudiante';
-  assignedTo?: string; // email of the assigned teacher
-  progress?: {
+  assignedTo: string; 
+  progress: {
     quizzes: {
       quizId: string;
       score: number;
@@ -62,10 +87,16 @@ export interface Progress {
   }[];
 }
 
+export interface RegisterData {
+  name: string; 
+  email: string;
+  password: string;
+}
+
 export interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (user: Omit<User, 'id'>) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 } 

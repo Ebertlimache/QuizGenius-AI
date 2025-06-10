@@ -21,16 +21,16 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError('');
     try {
-      await register({ 
-        name, 
-        email, 
-        password,
-        role: 'estudiante'
-      });
+      if (!email || !password) {
+        setError('Por favor completa todos los campos');
+        return;
+      }
+      await register(email, password);
       router.push('/dashboard');
-    } catch (err) {
-      setError('Error al registrar usuario');
+    } catch (err: any) {
+      setError(err.message + "jaja" || 'Error al registrar usuario');
     }
   };
 

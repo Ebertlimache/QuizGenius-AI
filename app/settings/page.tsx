@@ -9,7 +9,7 @@ import Link from 'next/link';
 export default function SettingsPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
-  const [name, setName] = useState(user?.name || '');
+  const [name, setName] = useState(user?.email || '');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   const handleSave = () => {

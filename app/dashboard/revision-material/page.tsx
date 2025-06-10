@@ -4,47 +4,47 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import PrivateRoute from '@/components/PrivateRoute';
-import { getStudentsForDocente, updateMaterialStatus } from '@/lib/user-utils';
+import { updateMaterialStatus } from '@/lib/user-utils';
 import { User } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 
 export default function RevisionMaterialPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [students, setStudents] = useState<User[]>([]);
+  const [materials, setMaterials] = useState<User['progress']['uploadedMaterials']>([]);
   const [selectedMaterial, setSelectedMaterial] = useState<{
-    studentEmail: string;
+    userEmail: string;
     material: User['progress']['uploadedMaterials'][0];
   } | null>(null);
   const [feedback, setFeedback] = useState('');
 
   useEffect(() => {
-    if (user?.role !== 'docente') {
+    if (!user) {
       router.push('/dashboard');
       return;
     }
 
-    const docenteStudents = getStudentsForDocente(user.email);
-    setStudents(docenteStudents);
+    // Aquí deberías cargar los materiales desde tu API
+    // Por ahora usamos un array vacío
+    setMaterials([]);
   }, [user, router]);
 
   const handleStatusUpdate = (status: 'approved' | 'rejected') => {
     if (!selectedMaterial) return;
     
     updateMaterialStatus(
-      selectedMaterial.studentEmail,
+      selectedMaterial.userEmail,
       selectedMaterial.material.id,
       status,
       feedback
     );
     
-    // Refresh the students list
-    const docenteStudents = getStudentsForDocente(user!.email);
-    setStudents(docenteStudents);
+    // Refresh the materials list
+    setMaterials([]); // Aquí deberías recargar los materiales desde tu API
     setSelectedMaterial(null);
     setFeedback('');
   };
@@ -65,7 +65,7 @@ export default function RevisionMaterialPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Revisión de Material</h1>
-          <p className="text-gray-500">Revisa y aprueba el material subido por tus estudiantes</p>
+          <p className="text-gray-500">Revisa y aprueba el material subido</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -76,28 +76,23 @@ export default function RevisionMaterialPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {students.map((student) =>
-                  student.progress?.uploadedMaterials?.map((material) => (
-                    <div
-                      key={material.id}
-                      className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                      onClick={() => setSelectedMaterial({ studentEmail: student.email, material })}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-medium">{material.title}</h3>
-                          <p className="text-sm text-gray-500">
-                            Subido por: {student.name}
-                          </p>
-                        </div>
-                        {getStatusBadge(material.status)}
+                {materials.map((material) => (
+                  <div
+                    key={material.id}
+                    className="p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                    onClick={() => setSelectedMaterial({ userEmail: user!.email, material })}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="font-medium">{material.title}</h3>
                       </div>
-                      <p className="text-sm text-gray-500 mt-2">
-                        Fecha: {new Date(material.uploadedAt).toLocaleDateString()}
-                      </p>
+                      {getStatusBadge(material.status)}
                     </div>
-                  ))
-                )}
+                    <p className="text-sm text-gray-500 mt-2">
+                      Fecha: {new Date(material.uploadedAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

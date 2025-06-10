@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Clock, Flag } from "lucide-react"
+import { User } from "@/lib/types"
 
 // Datos simulados del cuestionario
 const quizData = {
