@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import PrivateRoute from '@/components/PrivateRoute';
-import { getStudentsForDocente } from '@/lib/user-utils';
 import { User } from '@/lib/types';
 import {
   Table,

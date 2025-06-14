@@ -99,4 +99,12 @@ export interface AuthContextType {
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
+}
+
+export interface Workspace {
+  id: number;
+  title: string;
+  description: string | null;
+  owner_id: number;
+  created_at: string;
 } 

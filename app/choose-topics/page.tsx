@@ -1,90 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Brain, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Workspace } from "@/lib/types";
 
-const initialTopics = [
-  {
-    id: 'matematicas',
-    name: 'Matemáticas',
-    description: 'Álgebra, cálculo, geometría y más',
-  },
-  {
-    id: 'ciencias',
-    name: 'Ciencias',
-    description: 'Física, química, biología',
-  },
-  {
-    id: 'historia',
-    name: 'Historia',
-    description: 'Historia mundial y local',
-  },
-  {
-    id: 'literatura',
-    name: 'Literatura',
-    description: 'Análisis literario y escritura',
-  },
-  {
-    id: 'programacion',
-    name: 'Programación',
-    description: 'Desarrollo web y software',
-  },
-  {
-    id: 'idiomas',
-    name: 'Idiomas',
-    description: 'Inglés, español y más',
-  },
-  {
-    id: 'musica',
-    name: 'Música',
-    description: 'Teoría musical y práctica',
-  }
-];
+const API_URL = "http://localhost:8000/api/v1";
 
 export default function ChooseTopicsPage() {
-  const [topics, setTopics] = useState(initialTopics);
-  const [selectedTopics, setSelectedTopics] = useState<string[]>([]);
-  const [newTopicName, setNewTopicName] = useState('');
-  const [newTopicDescription, setNewTopicDescription] = useState('');
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [newWorkspaceTitle, setNewWorkspaceTitle] = useState('');
+  const [newWorkspaceDescription, setNewWorkspaceDescription] = useState('');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
 
-  const handleTopicToggle = (topicId: string) => {
-    setSelectedTopics(prev => {
-      if (prev.includes(topicId)) {
-        return prev.filter(id => id !== topicId);
-      } else {
-        return [...prev, topicId];
+  useEffect(() => {
+    const fetchWorkspaces = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/workspaces/`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al cargar los espacios de trabajo');
+        }
+
+        const data = await response.json();
+        setWorkspaces(data);
+      } catch (err) {
+        setError('Error al cargar los espacios de trabajo');
+        console.error(err);
       }
-    });
-  };
+    };
 
-  const handleAddTopic = () => {
-    if (newTopicName.trim() && newTopicDescription.trim()) {
-      const newTopic = {
-        id: newTopicName.toLowerCase().replace(/\s+/g, '-'),
-        name: newTopicName,
-        description: newTopicDescription,
-      };
-      setTopics([...topics, newTopic]);
-      setNewTopicName('');
-      setNewTopicDescription('');
-      setIsDialogOpen(false);
+    fetchWorkspaces();
+  }, []);
+
+  const handleAddWorkspace = async () => {
+    if (newWorkspaceTitle.trim()) {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/workspaces/`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            title: newWorkspaceTitle,
+            description: newWorkspaceDescription
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error('Error al crear el espacio de trabajo');
+        }
+
+        const newWorkspace = await response.json();
+        setWorkspaces([...workspaces, newWorkspace]);
+        setNewWorkspaceTitle('');
+        setNewWorkspaceDescription('');
+        setIsDialogOpen(false);
+      } catch (err) {
+        setError('Error al crear el espacio de trabajo');
+        console.error(err);
+      }
     }
   };
-
-  const handleContinue = () => {
-    if (selectedTopics.length > 0) {
-      // Aquí iría la lógica para guardar los temas seleccionados
-      router.push('/dashboard');
-    }
+  
+  // Nueva función para manejar el clic en un workspace
+  const handleWorkspaceClick = (workspaceId: number) => {
+    // Redirige al dashboard respectivo.
+    // Usamos el ID del workspace en la URL.
+    //router.push(`/dashboard`);
+    router.push(`/dashboard/${workspaceId}`);
   };
 
   return (
@@ -96,32 +94,31 @@ export default function ChooseTopicsPage() {
               <Brain className="h-8 w-8 text-indigo-600" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-              Elige tus temas de interés
+              Elige tu espacio de trabajo
             </h1>
             <p className="mt-2 text-sm text-gray-500">
-              Selecciona los temas que te gustaría estudiar. Podrás modificarlos más tarde.
+              Selecciona un espacio para comenzar a estudiar.
             </p>
           </div>
 
+          {error && (
+            <div className="bg-red-50 text-red-500 text-sm p-3 rounded-md border border-red-200 mb-4">
+              {error}
+            </div>
+          )}
+
           <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
-            {topics.map((topic) => (
+            {workspaces.map((workspace) => (
               <Card 
-                key={topic.id}
-                className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg ${
-                  selectedTopics.includes(topic.id) ? 'ring-2 ring-indigo-500' : ''
-                }`}
+                key={workspace.id}
+                // Añadimos el evento onClick directamente a la tarjeta
+                onClick={() => handleWorkspaceClick(workspace.id)}
+                className="relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:ring-2 hover:ring-indigo-500 cursor-pointer"
               >
                 <CardHeader className="p-4">
-                  <div className="flex items-center justify-between">
-                    <Checkbox
-                      id={topic.id}
-                      checked={selectedTopics.includes(topic.id)}
-                      onCheckedChange={() => handleTopicToggle(topic.id)}
-                      className="h-4 w-4"
-                    />
-                  </div>
-                  <CardTitle className="text-base mt-2">{topic.name}</CardTitle>
-                  <CardDescription className="text-xs">{topic.description}</CardDescription>
+                  {/* Ya no necesitamos el checkbox */}
+                  <CardTitle className="text-base mt-2">{workspace.title}</CardTitle>
+                  <CardDescription className="text-xs">{workspace.description || 'Sin descripción'}</CardDescription>
                 </CardHeader>
               </Card>
             ))}
@@ -132,35 +129,35 @@ export default function ChooseTopicsPage() {
                   <CardHeader className="p-4 flex items-center justify-center h-full">
                     <div className="flex flex-col items-center gap-2">
                       <Plus className="h-6 w-6 text-gray-400" />
-                      <span className="text-sm text-gray-500">Agregar tema</span>
+                      <span className="text-sm text-gray-500">Agregar espacio</span>
                     </div>
                   </CardHeader>
                 </Card>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Agregar nuevo tema</DialogTitle>
+                  <DialogTitle>Agregar nuevo espacio de trabajo</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Nombre del tema</Label>
+                    <Label htmlFor="title">Título</Label>
                     <Input
-                      id="name"
-                      value={newTopicName}
-                      onChange={(e) => setNewTopicName(e.target.value)}
-                      placeholder="Ingresa el nombre del tema"
+                      id="title"
+                      value={newWorkspaceTitle}
+                      onChange={(e) => setNewWorkspaceTitle(e.target.value)}
+                      placeholder="Ingresa el título del espacio"
                     />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="description">Descripción</Label>
                     <Input
                       id="description"
-                      value={newTopicDescription}
-                      onChange={(e) => setNewTopicDescription(e.target.value)}
+                      value={newWorkspaceDescription}
+                      onChange={(e) => setNewWorkspaceDescription(e.target.value)}
                       placeholder="Ingresa una descripción"
                     />
                   </div>
-                  <Button onClick={handleAddTopic}>Agregar tema</Button>
+                  <Button onClick={handleAddWorkspace}>Agregar espacio</Button>
                 </div>
               </DialogContent>
             </Dialog>
@@ -168,23 +165,7 @@ export default function ChooseTopicsPage() {
         </div>
       </div>
 
-      <div className="border-t bg-white p-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-gray-500">
-            {selectedTopics.length === 0
-              ? 'Selecciona al menos un tema para continuar'
-              : `Has seleccionado ${selectedTopics.length} tema${selectedTopics.length !== 1 ? 's' : ''}`}
-          </p>
-          <Button
-            size="lg"
-            onClick={handleContinue}
-            disabled={selectedTopics.length === 0}
-            className="w-full sm:w-auto"
-          >
-            Continuar
-          </Button>
-        </div>
-      </div>
+      {/* La barra inferior con el botón de "Continuar" ha sido eliminada */}
     </div>
   );
 } 
