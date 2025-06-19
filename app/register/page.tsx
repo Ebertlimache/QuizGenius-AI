@@ -28,7 +28,7 @@ export default function RegisterPage() {
         return;
       }
       await register(email, password);
-      router.push('/dashboard');
+      router.push('/choose-topics');
     } catch (err: any) {
       setError(err.message + "jaja" || 'Error al registrar usuario');
     }
