@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { FileQuestion, Clock, Plus, Trophy, Target } from "lucide-react"
+import { FileQuestion, Clock, Trophy } from "lucide-react"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -11,21 +11,20 @@ import { useParams } from "next/navigation"
 
 const API_URL = "http://localhost:8000/api/v1";
 
-
 interface QuizQuestion {
   id: number;
   question: string;
   options: string[];
-  correctAnswer: number;
-  explanation?: string;
+  correct_answer: number;
+  explanation: string;
 }
 
 interface QuizData {
-  id: string;
+  id: number;
   title: string;
-  description?: string;
-  difficulty?: string;
-  questions: number;
+  description: string;
+  difficulty: string;
+  questions: number; // Número de preguntas, no array
   completed_at?: string;
   score?: number;
   time_spent?: number;
@@ -33,8 +32,9 @@ interface QuizData {
   
 export default function QuizzesPage() {
   const params = useParams();
-  console.log("Params:", params);
   const subtopicId = params.subtopicId as string;
+  const workspaceId = params.workspaceId as string;
+  
   const [quizzes, setQuizzes] = useState<QuizData[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -43,6 +43,8 @@ export default function QuizzesPage() {
     const fetchQuizzes = async () => {
       try {
         const token = localStorage.getItem('token');
+        
+        // Endpoint correcto según el backend
         const response = await fetch(`${API_URL}/workspaces/subtopics/${subtopicId}/quizzes`, {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -50,20 +52,24 @@ export default function QuizzesPage() {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to fetch quizzes');
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
 
         const data = await response.json();
-        setQuizzes(data);
+        console.log('Quizzes data:', data); // Debug
+        setQuizzes(Array.isArray(data) ? data : []);
       } catch (err: any) {
+        console.error('Error fetching quizzes:', err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchQuizzes();
-  }, [subtopicId]);
+    if (subtopicId) {
+      fetchQuizzes();
+    }
+  }, [subtopicId, workspaceId]);
 
   const getDifficultyColor = (difficulty?: string) => {
     switch (difficulty) {
@@ -90,7 +96,11 @@ export default function QuizzesPage() {
     return (
       <div className="p-4">
         <div className="bg-red-50 text-red-700 p-4 rounded-md">
-          {error}
+          <h3 className="font-medium">Error al cargar cuestionarios</h3>
+          <p className="mt-1 text-sm">{error}</p>
+          <p className="mt-2 text-xs">
+            SubtopicId: {subtopicId}, WorkspaceId: {workspaceId}
+          </p>
         </div>
       </div>
     );
@@ -105,61 +115,75 @@ export default function QuizzesPage() {
         </div>
       </div>
 
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {quizzes.map((quiz) => (
-            <CarouselItem key={quiz.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-              <Card className="min-h-[450px] flex flex-col">
-                <CardHeader className="flex-grow">
-                  <div className="flex items-center justify-between">
-                    <div className="rounded-full bg-blue-100 p-2">
-                      <FileQuestion className="h-4 w-4 text-blue-600" />
+      {quizzes.length === 0 ? (
+        <div className="text-center py-12">
+          <FileQuestion className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No hay cuestionarios</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Aún no se han generado cuestionarios para este subtópico.
+          </p>
+        </div>
+      ) : (
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true
+          }}
+          className="w-full"
+        >
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {quizzes.map((quiz) => (
+              <CarouselItem key={quiz.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                <Card className="min-h-[450px] flex flex-col">
+                  <CardHeader className="flex-grow">
+                    <div className="flex items-center justify-between">
+                      <div className="rounded-full bg-blue-100 p-2">
+                        <FileQuestion className="h-4 w-4 text-blue-600" />
+                      </div>
+                      <Badge className={getDifficultyColor(quiz.difficulty)}>
+                        {quiz.difficulty || "Básico"}
+                      </Badge>
                     </div>
-                    <Badge className={getDifficultyColor(quiz.difficulty)}>{quiz.difficulty || "Básico"}</Badge>
-                  </div>
-                  <CardTitle className="mt-4 text-xl">{quiz.title}</CardTitle>
-                  <CardDescription className="mt-2 text-base">{quiz.description}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center text-sm text-gray-600">
-                      <FileQuestion className="mr-2 h-5 w-5" />
-                      {quiz.questions} preguntas
+                    <CardTitle className="mt-4 text-xl">{quiz.title}</CardTitle>
+                    <CardDescription className="mt-2 text-base">
+                      {quiz.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <FileQuestion className="mr-2 h-5 w-5" />
+                        {quiz.questions || 0} preguntas
+                      </div>
+                      {quiz.completed_at && (
+                        <>
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Clock className="mr-2 h-5 w-5" />
+                            {quiz.time_spent} minutos
+                          </div>
+                          <div className="flex items-center text-sm text-gray-600">
+                            <Trophy className="mr-2 h-5 w-5" />
+                            Puntuación: {quiz.score}%
+                          </div>
+                        </>
+                      )}
                     </div>
-                    {quiz.completed_at && (
-                      <>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Clock className="mr-2 h-5 w-5" />
-                          {quiz.time_spent} minutos
-                        </div>
-                        <div className="flex items-center text-sm text-gray-600">
-                          <Trophy className="mr-2 h-5 w-5" />
-                          Puntuación: {quiz.score}%
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-                <CardFooter className="mt-auto">
-                  <Button className="w-full text-base py-6" asChild>
-                    <Link href={`/dashboard/${params.workspaceId}/quizzes/${quiz.id}`}>
-                      {quiz.completed_at ? "Volver a intentar" : "Comenzar"}
-                    </Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            </CarouselItem>
-          ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+                  </CardContent>
+                  <CardFooter className="mt-auto">
+                    <Button className="w-full text-base py-6" asChild>
+                      <Link href={`/dashboard/${workspaceId}/quizzes/${subtopicId}/${quiz.id}`}>
+                        {quiz.completed_at ? "Volver a intentar" : "Comenzar"}
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
+      )}
     </div>
   )
 }
