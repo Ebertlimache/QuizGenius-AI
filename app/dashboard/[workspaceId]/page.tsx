@@ -7,7 +7,7 @@ import Link from 'next/link';
 import PrivateRoute from '@/components/PrivateRoute';
 import { Button } from "@/components/ui/button";
 import { Card, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { BookOpen, FileText, Brain, BarChart, User, LogOut } from "lucide-react";
+import { BookOpen, FileText, Brain, BarChart, User, LogOut, Database } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from '@/lib/utils';
 import { Workspace } from '@/lib/types';
@@ -118,6 +118,16 @@ export default function WorkspaceDashboardPage() {
       color: "text-orange-600",
       bgColor: "bg-orange-100",
       darkBgColor: "bg-orange-900/30"
+    },
+    {
+      id: 5,
+      title: "Subtopicos",
+      description: "Encuentra todos tus temas especializados",
+      icon: Database,
+      href: `/dashboard/${workspaceId}/subtopics`,
+      color: "text-red-600",
+      bgColor: "bg-red-100",
+      darkBgColor: "bg-red-900/30"
     }
   ];
 
