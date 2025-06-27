@@ -99,6 +99,16 @@ export default function FlashcardPage() {
   }
 
   const card = flashcardSet.cards[currentCard]
+
+  if (!card) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <p className="text-gray-500">No hay flashcards para este subtema.</p>
+        <Button onClick={() => router.back()}>Volver</Button>
+      </div>
+    );
+  }
+
   const progress = ((currentCard + 1) / flashcardSet.cards.length) * 100
 
   const handleFlip = () => {
