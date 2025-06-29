@@ -189,19 +189,28 @@ export default function WorkspaceDashboardPage() {
             {dashboardItems.map((item) => (
               <Card
                 key={item.id}
-                className='flex flex-col bg-white dark:bg-black dark:border-gray-700'
+                className="flex flex-col items-stretch justify-between bg-white border-2 border-blue-100 rounded-3xl shadow-sm transition-transform hover:scale-[1.025] hover:shadow-lg dark:bg-zinc-900 dark:border-blue-900/40 min-h-[320px]"
               >
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className={cn('rounded-full p-2', theme === 'dark' ? item.darkBgColor : item.bgColor)}>
-                      <item.icon className={cn(item.color, 'h-5 w-5')} />
-                    </div>
+                <CardHeader className="flex flex-col items-center gap-2 pt-8 pb-4">
+                  <div className={cn(
+                    'flex items-center justify-center rounded-full',
+                    'w-20 h-20 mb-2',
+                    theme === 'dark' ? item.darkBgColor : item.bgColor
+                  )}>
+                    <item.icon className={cn(item.color, 'h-12 w-12')} />
                   </div>
-                  <CardTitle className='mt-2 text-gray-900 dark:text-white'>{item.title}</CardTitle>
-                  <CardDescription className='text-gray-500 dark:text-gray-400'>{item.description}</CardDescription>
+                  <CardTitle className="text-xl font-extrabold text-blue-700 uppercase tracking-wide text-center dark:text-blue-400">
+                    {item.title}
+                  </CardTitle>
+                  <CardDescription className="text-center text-gray-500 text-base font-medium dark:text-gray-400">
+                    {item.description}
+                  </CardDescription>
                 </CardHeader>
-                <CardFooter className="mt-auto">
-                  <Button className='w-full bg-gray-900 text-white dark:bg-gray-800 dark:hover:bg-gray-700' asChild>
+                <CardFooter className="flex flex-col items-center justify-end flex-1 pb-8 px-6">
+                  <Button
+                    className="w-full py-3 rounded-xl text-base font-bold bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-colors dark:bg-blue-700 dark:hover:bg-blue-800"
+                    asChild
+                  >
                     <Link href={item.href}>Acceder</Link>
                   </Button>
                 </CardFooter>

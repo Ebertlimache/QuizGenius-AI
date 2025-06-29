@@ -118,49 +118,50 @@ export default function DashboardLayout({
         </nav>
       </div>
 
-      {/* Desktop sidebar */}
-      <div className={cn("hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col lg:border-r lg:shadow-sm",
-        theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200')}>
-        <div className={cn("flex h-16 items-center gap-2 border-b px-6",
-          theme === 'dark' ? 'border-gray-700' : 'border-gray-200')}>
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-600">
-            <Brain className="h-5 w-5 text-white" />
-          </div>
-          <span className={cn("text-xl font-bold", theme === 'dark' ? 'text-white' : 'text-gray-900')}>
-            QuizGenius AI
-          </span>
+      {/* Sidebar compacto estilo Duolingo, más aireado */}
+      <div className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-72 z-40 bg-white border-r shadow-lg py-8 px-6">
+        <div className="mb-6 flex items-center justify-center">
+          <span className="text-2xl font-extrabold text-blue-600 tracking-tight" style={{ fontFamily: 'Arial Rounded MT Bold, Arial, sans-serif' }}>QuizGenius</span>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 p-4">
-          {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                pathname === item.href 
-                  ? theme === 'dark' 
-                    ? "bg-gray-700 text-white" 
-                    : "bg-blue-50 text-blue-600"
-                  : theme === 'dark'
-                    ? "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    : "text-gray-700 hover:bg-gray-100"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              {item.name}
-            </Link>
-          ))}
+        <nav className="flex-1 flex flex-col gap-3">
+          {navigation.map((item) => {
+            const active = pathname === item.href;
+            const Icon = item.icon;
+            const colorMap = {
+              Dashboard: 'text-yellow-500',
+              'Subir Material': 'text-pink-500',
+              Flashcards: 'text-yellow-400',
+              Cuestionarios: 'text-sky-500',
+              Progreso: 'text-amber-500',
+              Configuración: 'text-blue-500',
+            };
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 px-4 py-2.5 rounded-xl text-base font-bold uppercase tracking-wide transition-all mb-1 shadow-sm",
+                  active
+                    ? "bg-blue-50 border-2 border-blue-300 text-blue-700 shadow-md"
+                    : "bg-white text-gray-700 hover:bg-blue-50 hover:text-blue-700"
+                )}
+                style={{ minHeight: 44 }}
+              >
+                <span className={cn(
+                  "flex items-center justify-center rounded-full p-1.5",
+                  active ? "bg-blue-100" : ""
+                )}>
+                  <Icon size={22} className={colorMap[item.name as keyof typeof colorMap] || 'text-blue-500'} />
+                </span>
+                <span className="ml-1">{item.name}</span>
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col lg:pl-64">
-        {/* Header */}
-        <header className={cn("sticky top-0 z-30 flex h-16 items-center gap-4 border-b px-4 shadow-sm",
-          theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200')}>
-          {/* ... (el resto del header no necesita cambios) */}
-        </header>
-
+      <div className="flex-1 flex flex-col lg:ml-72">
         {/* Main content area */}
         <main className={cn("flex-1 p-6", theme === 'dark' ? 'text-gray-100' : 'text-gray-900')}>
           {children}

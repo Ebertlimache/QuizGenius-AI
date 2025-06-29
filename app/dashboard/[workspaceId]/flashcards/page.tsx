@@ -37,30 +37,51 @@ export default function FlashcardsIndexPage() {
   }, [workspaceId, router]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
-      <BookOpen className="mx-auto h-12 w-12 text-purple-400 mb-4" />
-      <h2 className="text-2xl font-bold mb-2">Selecciona un subtópico</h2>
-      <p className="text-gray-500 max-w-md mb-6">
-        Para ver las flashcards, selecciona un subtópico:
-      </p>
-      <div className="flex flex-col gap-3 w-full max-w-xs">
+    <div className="max-w-4xl mx-auto py-10">
+      <div className="flex flex-col items-center mb-8">
+        <div className="flex items-center justify-center rounded-full w-20 h-20 mb-2 bg-purple-100">
+          <BookOpen className="h-12 w-12 text-purple-500" />
+        </div>
+        <h2 className="text-2xl font-extrabold text-purple-700 mb-1 uppercase tracking-wide text-center">Selecciona un subtópico</h2>
+        <p className="text-gray-500 max-w-md text-center text-base font-medium">
+          Para ver las flashcards, selecciona un subtópico:
+        </p>
+      </div>
+      <div className="grid gap-6 sm:grid-cols-2">
         {loading ? (
           <span className="text-gray-400">Cargando...</span>
         ) : error ? (
           <span className="text-red-500">{error}</span>
         ) : (
-          subtopics.map((sub: any) => (
-            <Link
-              key={sub.subtopic_id}
-              href={`/dashboard/${workspaceId}/flashcards/${sub.subtopic_id}`}
-              className="block w-full py-3 px-4 rounded-lg bg-white hover:bg-purple-50 border border-gray-200 text-gray-800 font-medium shadow-sm transition-all text-left text-base"
-            >
-              {sub.subtopic_title}
-            </Link>
-          ))
+          subtopics.map((sub: any, idx: number) => {
+            // Colores cíclicos para icono y fondo
+            const colorSets = [
+              { icon: 'text-purple-600', bg: 'bg-purple-100' },
+              { icon: 'text-blue-600', bg: 'bg-blue-100' },
+              { icon: 'text-pink-600', bg: 'bg-pink-100' },
+              { icon: 'text-yellow-600', bg: 'bg-yellow-100' },
+              { icon: 'text-green-600', bg: 'bg-green-100' },
+              { icon: 'text-orange-600', bg: 'bg-orange-100' },
+            ];
+            const color = colorSets[idx % colorSets.length];
+            return (
+              <Link
+                key={sub.subtopic_id}
+                href={`/dashboard/${workspaceId}/flashcards/${sub.subtopic_id}`}
+                className={
+                  `flex flex-col items-center justify-center p-8 rounded-3xl border-2 border-purple-100 bg-white shadow-sm hover:shadow-lg transition-all min-h-[180px] group hover:scale-[1.025]`
+                }
+              >
+                <div className={`flex items-center justify-center rounded-full w-16 h-16 mb-3 ${color.bg}`}>
+                  <BookOpen className={`h-8 w-8 ${color.icon} transition-all group-hover:scale-110`} />
+                </div>
+                <span className="text-lg font-bold text-purple-700 text-center mb-1 truncate w-full">{sub.subtopic_title}</span>
+              </Link>
+            );
+          })
         )}
       </div>
-      <p className="text-xs text-gray-400 mt-6">WorkspaceId: {workspaceId}</p>
+      <p className="text-xs text-gray-400 mt-8 text-center">WorkspaceId: {workspaceId}</p>
     </div>
   );
 } 
