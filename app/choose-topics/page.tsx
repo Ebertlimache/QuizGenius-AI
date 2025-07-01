@@ -9,6 +9,7 @@ import { Brain, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Workspace } from "@/lib/types";
+import Image from 'next/image';
 
 const API_URL = "http://localhost:8000/api/v1";
 
@@ -86,50 +87,67 @@ export default function ChooseTopicsPage() {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
-      <div className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="text-center mb-6">
-            <div className="flex justify-center mb-2">
-              <Brain className="h-8 w-8 text-indigo-600" />
+    <div className="min-h-screen flex flex-col items-center justify-center relative bg-blue-400 overflow-hidden">
+      {/* Fondo decorativo */}
+      <Image src="/fondo.png" alt="Fondo" fill priority className="object-cover z-0" style={{opacity:0.18}} />
+      {/* SVG decorativos */}
+      <div className="absolute top-8 left-8 z-10 hidden md:block">
+        <svg width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="30" rx="38" ry="18" fill="#FF7BAC"/>
+          <ellipse cx="30" cy="30" rx="10" ry="16" fill="#fff" fillOpacity="0.5"/>
+        </svg>
+      </div>
+      <div className="absolute bottom-8 right-8 z-10 hidden md:block">
+        <svg width="80" height="60" viewBox="0 0 80 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="40" cy="30" rx="38" ry="18" fill="#FF7BAC"/>
+          <ellipse cx="50" cy="30" rx="10" ry="16" fill="#fff" fillOpacity="0.5"/>
+        </svg>
+      </div>
+      <div className="absolute top-8 right-24 z-10 hidden md:block">
+        <svg width="70" height="50" viewBox="0 0 70 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="50" height="30" rx="6" fill="#A0E9A3"/>
+          <rect x="20" y="15" width="30" height="20" rx="3" fill="#fff" fillOpacity="0.7"/>
+        </svg>
+      </div>
+      {/* Card principal de selección de espacios */}
+      <div className="relative flex flex-col items-center w-full max-w-4xl z-20 mt-12 mb-12">
+        <div className="flex flex-col items-center bg-white rounded-3xl shadow-lg px-6 py-8 w-full">
+          <div className="flex flex-col items-center mb-6">
+            <div className="rounded-full bg-indigo-100 flex items-center justify-center mb-2" style={{width:60, height:60}}>
+              <Brain className="h-10 w-10 text-indigo-600" />
             </div>
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-              Elige tu espacio de trabajo
-            </h1>
-            <p className="mt-2 text-sm text-gray-500">
-              Selecciona un espacio para comenzar a estudiar.
-            </p>
+            <h1 className="text-3xl font-extrabold text-blue-900 mb-1 text-center">Elige tu espacio de trabajo</h1>
+            <p className="text-base text-blue-700 text-center">Selecciona un espacio para comenzar a estudiar.</p>
           </div>
-
           {error && (
             <div className="bg-red-50 text-red-500 text-sm p-3 rounded-md border border-red-200 mb-4">
               {error}
             </div>
           )}
-
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 w-full">
             {workspaces.map((workspace) => (
               <Card 
                 key={workspace.id}
-                // Añadimos el evento onClick directamente a la tarjeta
                 onClick={() => handleWorkspaceClick(workspace.id)}
-                className="relative overflow-hidden transition-all duration-200 hover:shadow-lg hover:ring-2 hover:ring-indigo-500 cursor-pointer"
+                className="flex flex-col items-center justify-center p-6 bg-white rounded-2xl shadow-md transition-all duration-200 hover:shadow-xl hover:ring-2 hover:ring-indigo-500 cursor-pointer min-h-[140px]"
               >
-                <CardHeader className="p-4">
-                  {/* Ya no necesitamos el checkbox */}
-                  <CardTitle className="text-base mt-2">{workspace.title}</CardTitle>
-                  <CardDescription className="text-xs">{workspace.description || 'Sin descripción'}</CardDescription>
+                <CardHeader className="flex flex-col items-center p-0 mb-2">
+                  <div className="rounded-full bg-indigo-50 flex items-center justify-center mb-2" style={{width:40, height:40}}>
+                    <Brain className="h-6 w-6 text-indigo-500" />
+                  </div>
+                  <CardTitle className="text-lg font-bold text-blue-900 text-center">{workspace.title}</CardTitle>
+                  <CardDescription className="text-xs text-gray-500 text-center">{workspace.description || 'Sin descripción'}</CardDescription>
                 </CardHeader>
               </Card>
             ))}
-
+            {/* Card para agregar espacio */}
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Card className="relative overflow-hidden transition-all duration-200 hover:shadow-lg cursor-pointer">
-                  <CardHeader className="p-4 flex items-center justify-center h-full">
+                <Card className="flex flex-col items-center justify-center p-6 bg-indigo-50 rounded-2xl shadow-md transition-all duration-200 hover:shadow-xl cursor-pointer min-h-[140px] border-2 border-dashed border-indigo-200">
+                  <CardHeader className="flex flex-col items-center p-0">
                     <div className="flex flex-col items-center gap-2">
-                      <Plus className="h-6 w-6 text-gray-400" />
-                      <span className="text-sm text-gray-500">Agregar espacio</span>
+                      <Plus className="h-8 w-8 text-indigo-400" />
+                      <span className="text-base text-indigo-600 font-semibold">Agregar espacio</span>
                     </div>
                   </CardHeader>
                 </Card>
@@ -157,15 +175,13 @@ export default function ChooseTopicsPage() {
                       placeholder="Ingresa una descripción"
                     />
                   </div>
-                  <Button onClick={handleAddWorkspace}>Agregar espacio</Button>
+                  <Button onClick={handleAddWorkspace} className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md rounded-xl mt-2">Agregar espacio</Button>
                 </div>
               </DialogContent>
             </Dialog>
           </div>
         </div>
       </div>
-
-      {/* La barra inferior con el botón de "Continuar" ha sido eliminada */}
     </div>
   );
 } 
