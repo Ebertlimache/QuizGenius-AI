@@ -109,16 +109,16 @@ export default function WorkspaceDashboardPage() {
       bgColor: "bg-green-100",
       darkBgColor: "bg-green-900/30"
     },
-    {
-      id: 4,
-      title: "Progreso",
-      description: "Visualiza tu progreso y obtén recomendaciones",
-      icon: BarChart,
-      href: `/dashboard/${workspaceId}/progreso`,
-      color: "text-orange-600",
-      bgColor: "bg-orange-100",
-      darkBgColor: "bg-orange-900/30"
-    },
+    // {
+    //   id: 4,
+    //   title: "Progreso",
+    //   description: "Visualiza tu progreso y obtén recomendaciones",
+    //   icon: BarChart,
+    //   href: `/dashboard/${workspaceId}/progreso`,
+    //   color: "text-orange-600",
+    //   bgColor: "bg-orange-100",
+    //   darkBgColor: "bg-orange-900/30"
+    // },
     {
       id: 5,
       title: "Subtopicos",
