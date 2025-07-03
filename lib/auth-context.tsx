@@ -1,9 +1,11 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { AuthContextType, User } from './types';
+import { AuthContextType, User, RegisterData } from './types'; 
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const API_URL = "http://localhost:8000/api/v1";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -11,101 +13,98 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Initialize default users if they don't exist
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const defaultUsers = [
-      {
-        id: 'admin-1',
-        name: 'Administrador',
-        email: 'admin@admin.com',
-        password: 'admin',
-        role: 'admin' as const
-      },
-      {
-        id: 'docente-1',
-        name: 'Docente',
-        email: 'docente@docente.com',
-        password: 'docente',
-        role: 'docente' as const
-      }
-    ];
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const response = await fetch(`${API_URL}/users/me`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
 
-    let hasChanges = false;
-    defaultUsers.forEach(defaultUser => {
-      if (!users.some((u: User) => u.email === defaultUser.email)) {
-        users.push(defaultUser);
-        hasChanges = true;
+          if (response.ok) {
+            const userData = await response.json();
+            setUser(userData);
+            setIsAuthenticated(true);
+          } else {
+            // Token inválido o expirado
+            localStorage.removeItem('token');
+          }
+        } catch (error) {
+          console.error('Error verifying token', error);
+          localStorage.removeItem('token');
+        }
       }
-    });
+      setIsLoading(false);
+    };
 
-    if (hasChanges) {
-      localStorage.setItem('users', JSON.stringify(users));
-    }
-
-    // Check if user is stored in localStorage
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      try {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-        localStorage.removeItem('user');
-      }
-    }
-    setIsLoading(false);
+    initializeAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
-    try {
-      // Simulate API call
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const foundUser = users.find((u: User) => u.email === email && u.password === password);
-      
-      if (foundUser) {
-        setUser(foundUser);
-        setIsAuthenticated(true);
-        localStorage.setItem('user', JSON.stringify(foundUser));
-      } else {
-        throw new Error('Credenciales inválidas');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      throw error;
+    // El endpoint de token espera datos de formulario, no JSON.
+    const details = {
+        'username': email,
+        'password': password
+    };
+    const formBody = Object.keys(details).map(key => encodeURIComponent(key) + '=' + encodeURIComponent(details[key as keyof typeof details])).join('&');
+
+    const response = await fetch(`${API_URL}/users/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+      },
+      body: formBody
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Credenciales inválidas');
     }
+
+    const { access_token } = await response.json();
+    localStorage.setItem('token', access_token);
+
+    // Después de obtener el token, pedimos los datos del usuario
+    const userResponse = await fetch(`${API_URL}/users/me`, {
+      headers: { 'Authorization': `Bearer ${access_token}` }
+    });
+
+    if (!userResponse.ok) {
+      throw new Error('No se pudo obtener la información del usuario');
+    }
+    
+    const userData = await userResponse.json();
+    setUser(userData);
+    setIsAuthenticated(true);
   };
 
-  const register = async (newUser: Omit<User, 'id'>) => {
-    try {
-      // Simulate API call
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      
-      if (users.some((u: User) => u.email === newUser.email)) {
-        throw new Error('El email ya está registrado');
-      }
+  const register = async (email: string, password: string) => {
+    const response = await fetch(`${API_URL}/users/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password
+        })
+    });
 
-      const user: User = {
-        ...newUser,
-        id: Math.random().toString(36).substr(2, 9),
-      };
-
-      users.push(user);
-      localStorage.setItem('users', JSON.stringify(users));
-      
-      setUser(user);
-      setIsAuthenticated(true);
-      localStorage.setItem('user', JSON.stringify(user));
-    } catch (error) {
-      console.error('Registration error:', error);
-      throw error;
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Error al registrar usuario');
     }
+
+    await login(email, password);
   };
 
   const logout = () => {
     setUser(null);
     setIsAuthenticated(false);
-    localStorage.removeItem('user');
+    localStorage.removeItem('token');
   };
 
   if (isLoading) {
@@ -125,4 +124,4 @@ export function useAuth() {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
-} 
+}

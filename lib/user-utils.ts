@@ -1,13 +1,6 @@
 import { User } from './types';
 
-export const getStudentsForDocente = (docenteEmail: string): User[] => {
-  const users = JSON.parse(localStorage.getItem('users') || '[]');
-  return users.filter((user: User) => 
-    user.role === 'estudiante' && user.assignedTo === docenteEmail
-  );
-};
-
-export const updateProgressForStudent = (email: string, newData: Partial<User['progress']>) => {
+export const updateProgressForUser = (email: string, newData: Partial<User['progress']>) => {
   const users = JSON.parse(localStorage.getItem('users') || '[]');
   const userIndex = users.findIndex((u: User) => u.email === email);
   
@@ -44,17 +37,17 @@ export const getDocenteForStudent = (studentEmail: string): User | null => {
 };
 
 export const updateMaterialStatus = (
-  studentEmail: string, 
+  userEmail: string, 
   materialId: string, 
   status: 'pending' | 'approved' | 'rejected',
   feedback?: string
 ) => {
   const users = JSON.parse(localStorage.getItem('users') || '[]');
-  const userIndex = users.findIndex((u: User) => u.email === studentEmail);
+  const userIndex = users.findIndex((u: User) => u.email === userEmail);
   
   if (userIndex !== -1 && users[userIndex].progress?.uploadedMaterials) {
     const materialIndex = users[userIndex].progress!.uploadedMaterials.findIndex(
-      m => m.id === materialId
+      (m: { id: string }) => m.id === materialId
     );
     
     if (materialIndex !== -1) {

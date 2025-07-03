@@ -92,3 +92,8 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Estilos personalizados para la página de login */
+.login-bg-custom {
+  background: linear-gradient(135deg, #4f8cff 0%, #6ad7f8 100%);
+}
