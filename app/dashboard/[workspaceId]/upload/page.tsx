@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
@@ -41,6 +41,8 @@ export default function UploadPage() {
   const [error, setError] = useState<string | null>(null)
   const [analysisTrackingId, setAnalysisTrackingId] = useState<number | null>(null)
   const [analysisStatus, setAnalysisStatus] = useState<"not_started" | "initiated" | "completed">("not_started")
+  const [analysisTime, setAnalysisTime] = useState(0)
+  const [analysisStartTime, setAnalysisStartTime] = useState<number | null>(null)
   const router = useRouter()
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -86,8 +88,27 @@ export default function UploadPage() {
     setIsAnalyzing(false)
     setAnalysisComplete(false)
     setSubtopics([])
-    setError(null)  
+    setError(null)
+    setAnalysisTime(0)
+    setAnalysisStartTime(null)
   }
+
+  // Timer para mostrar el tiempo de análisis
+  useEffect(() => {
+    let interval: NodeJS.Timeout | null = null
+    
+    if (isAnalyzing && analysisStartTime) {
+      interval = setInterval(() => {
+        setAnalysisTime(Math.floor((Date.now() - analysisStartTime) / 1000))
+      }, 1000)
+    }
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [isAnalyzing, analysisStartTime])
 
   const handleUpload = async () => {
     if (!file || !workspaceId) return
@@ -119,17 +140,13 @@ export default function UploadPage() {
       setProgress(100) // Upload complete
       setIsUploading(false)
       setIsAnalyzing(true)
+      setAnalysisStartTime(Date.now())
+      setAnalysisTime(0)
 
-      // TODO: Implement polling to check analysis status
-      // For now, we'll simulate completion after 5 seconds
-      setTimeout(() => {
-        setIsAnalyzing(false)
-        setAnalysisComplete(true)
-        setAnalysisStatus("completed")
-        setSubtopics([
-          { id: result.subtopic_id, title: "Topic from " + result.filename, description: "Generated from uploaded document" }
-        ])
-      }, 5000)
+      // Implementar polling real para verificar el estado del análisis
+      if (token) {
+        await pollAnalysisStatus(result.subtopic_id, token)
+      }
 
     } catch (err: any) {
       setError(err.message || 'Error al procesar el documento')
@@ -137,6 +154,71 @@ export default function UploadPage() {
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const pollAnalysisStatus = async (subtopicId: number, token: string) => {
+    const maxAttempts = 60 // Máximo 5 minutos (60 * 5 segundos)
+    let attempts = 0
+
+    const checkStatus = async (): Promise<void> => {
+      try {
+        const response = await fetch(`${API_URL}/analysis/${subtopicId}/status`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        })
+
+        if (!response.ok) {
+          throw new Error('Error al verificar el estado del análisis')
+        }
+
+        const statusData = await response.json()
+        
+        if (statusData.status === 'COMPLETED') {
+          // Análisis completado exitosamente
+          setIsAnalyzing(false)
+          setAnalysisComplete(true)
+          setAnalysisStatus("completed")
+          setSubtopics([
+            { id: subtopicId, title: statusData.message || `Topic from ${file?.name}`, description: "Generated from uploaded document" }
+          ])
+          return
+        } else if (statusData.status === 'FAILED') {
+          // Análisis falló
+          setIsAnalyzing(false)
+          setError('El análisis del documento falló. Por favor, intenta de nuevo.')
+          setAnalysisStatus("not_started")
+          return
+        } else if (statusData.status === 'PROCESSING') {
+          // Análisis aún en progreso, continuar polling
+          attempts++
+          if (attempts >= maxAttempts) {
+            setIsAnalyzing(false)
+            setError('El análisis está tomando más tiempo del esperado. Por favor, verifica más tarde.')
+            setAnalysisStatus("not_started")
+            return
+          }
+          
+          // Esperar 5 segundos antes del siguiente intento
+          setTimeout(checkStatus, 5000)
+        }
+      } catch (error) {
+        console.error('Error polling analysis status:', error)
+        attempts++
+        if (attempts >= maxAttempts) {
+          setIsAnalyzing(false)
+          setError('Error al verificar el estado del análisis. Por favor, intenta de nuevo.')
+          setAnalysisStatus("not_started")
+          return
+        }
+        
+        // En caso de error, esperar 5 segundos antes del siguiente intento
+        setTimeout(checkStatus, 5000)
+      }
+    }
+
+    // Iniciar el polling
+    checkStatus()
   }
 
   const handleGenerateContent = (type: "quiz" | "flashcards") => {
@@ -234,16 +316,29 @@ export default function UploadPage() {
                       <div className="flex items-center justify-between text-sm">
                         <span className="flex items-center gap-2">
                           {isUploading && <Loader2 className="h-4 w-4 animate-spin" />}
-                          {isAnalyzing && <Brain className="h-4 w-4 text-blue-600" />}
+                          {isAnalyzing && <Brain className="h-4 w-4 text-blue-600 animate-pulse" />}
                           {isUploading ? "Subiendo archivo..." : "Analizando contenido con IA..."}
                         </span>
-                        <span>{isUploading ? `${progress}%` : "Procesando..."}</span>
+                        <span className="text-blue-600 font-medium">
+                          {isUploading ? `${progress}%` : `${analysisTime}s`}
+                        </span>
                       </div>
                       <Progress value={isUploading ? progress : 100} className="h-2" />
                       {isAnalyzing && (
-                        <p className="text-xs text-gray-400">
-                          Estamos extrayendo conceptos clave y generando preguntas relevantes...
-                        </p>
+                        <div className="space-y-2">
+                          <p className="text-xs text-gray-600 font-medium">
+                            Procesando documento con inteligencia artificial...
+                          </p>
+                          <div className="text-xs text-gray-400 space-y-1">
+                            <p>• Extrayendo conceptos clave del documento</p>
+                            <p>• Generando preguntas de comprensión</p>
+                            <p>• Creando flashcards para memorización</p>
+                            <p>• Optimizando contenido para tu aprendizaje</p>
+                          </div>
+                          <p className="text-xs text-blue-500 font-medium mt-2">
+                            ⏱️ Tiempo estimado: 2-5 minutos
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}
@@ -280,17 +375,25 @@ export default function UploadPage() {
                   {isUploading ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Subiendo...
+                      Subiendo archivo...
                     </>
                   ) : isAnalyzing ? (
                     <>
-                      <Brain className="mr-2 h-4 w-4" />
-                      Analizando...
+                      <Brain className="mr-2 h-4 w-4 animate-pulse" />
+                      Analizando con IA ({analysisTime}s)
                     </>
                   ) : (
-                    "Subir y analizar"
+                    <>
+                      <Brain className="mr-2 h-4 w-4" />
+                      Subir y analizar con IA
+                    </>
                   )}
                 </Button>
+                {isAnalyzing && (
+                  <p className="text-xs text-gray-500 text-center mt-2">
+                    ⏱️ El análisis puede tomar entre 2-5 minutos dependiendo del tamaño del documento
+                  </p>
+                )}
               </CardFooter>
             )}
           </Card>
